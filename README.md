@@ -54,3 +54,10 @@ Uploaded photos are still stored under `data/uploads/photos/` (created automatic
 - Next.js (App Router) + TypeScript
 - Tailwind CSS
 - PostgreSQL + Prisma ORM
+
+## Production
+
+Public site: **https://gp-register.joesolutions.ph**  
+Runs on the shared Joe Solutions EC2 with EOG and TradeKo (PM2 + nginx), using a **dedicated** Postgres database `gamepassid` on the shared RDS instance.
+
+See **[docs/DEPLOY.md](docs/DEPLOY.md)** for DNS zone records, `CREATE DATABASE`, GitHub Actions secrets, nginx, and first bootstrap.
