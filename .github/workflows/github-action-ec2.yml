@@ -112,15 +112,16 @@ jobs:
             source ~/.bashrc || true
             nvm use 24.22.1 || nvm install 24.22.1
 
+            # Next/Tailwind build needs devDependencies even when .env has NODE_ENV=production.
             if [ -f package-lock.json ]; then
-              npm ci
+              npm ci --include=dev
             else
-              npm install
+              npm install --include=dev
             fi
 
             npx prisma generate
             npm run db:deploy
-            npm run build
+            NODE_ENV=production npm run build
 
             mkdir -p data/uploads/photos
 
