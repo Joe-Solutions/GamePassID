@@ -20,15 +20,12 @@ jobs:
 
       - name: Install
         run: npm ci
+        env:
+          # postinstall runs prisma generate; Prisma 7 config requires DATABASE_URL
+          DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:5432/gamepassid?schema=public
 
       - name: Lint
         run: npm run lint
-
-      - name: Prisma generate
-        run: npx prisma generate
-        env:
-          # generate does not need a live DB; placeholder satisfies prisma config load
-          DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:5432/gamepassid?schema=public
 
       - name: Build
         run: npm run build
