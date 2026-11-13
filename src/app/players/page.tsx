@@ -27,8 +27,8 @@ export default async function PlayersPage({
 }) {
   const params = await searchParams;
   const encoder = await getCurrentEncoder();
-  const games = listGames();
-  const players = listPlayers({
+  const games = await listGames();
+  const players = await listPlayers({
     q: params.q,
     gameId: params.gameId ? Number(params.gameId) : undefined,
     category: (params.category as PlayerCategory | undefined) || undefined,

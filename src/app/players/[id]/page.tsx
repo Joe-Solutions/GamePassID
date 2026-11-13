@@ -14,7 +14,7 @@ export default async function PlayerDetailPage({ params }: Params) {
   const playerId = Number(id);
   if (!playerId) notFound();
 
-  const player = getPlayerById(playerId);
+  const player = await getPlayerById(playerId);
   if (!player) notFound();
 
   const encoder = await getCurrentEncoder();

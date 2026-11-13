@@ -11,9 +11,9 @@ export default async function EncoderConsolePage() {
   const encoder = await getCurrentEncoder();
   if (!encoder) redirect("/encoder/login");
 
-  const games = listGames();
-  const recent = getRecentPlayers(6);
-  const players = listPlayers();
+  const games = await listGames();
+  const recent = await getRecentPlayers(6);
+  const players = await listPlayers();
 
   return (
     <>

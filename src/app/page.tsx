@@ -7,8 +7,8 @@ export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
   const encoder = await getCurrentEncoder();
-  const total = countPlayers();
-  const games = listGames();
+  const total = await countPlayers();
+  const games = await listGames();
 
   return (
     <>

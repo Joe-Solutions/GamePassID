@@ -29,7 +29,7 @@ export async function GET(request: Request) {
   const category = searchParams.get("category") as PlayerCategory | null;
   const status = searchParams.get("status") as PlayerStatus | null;
 
-  const players = listPlayers({
+  const players = await listPlayers({
     q,
     gameId: gameId ? Number(gameId) : undefined,
     category: category || undefined,
@@ -65,7 +65,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const game = getGameById(parsed.data.gameId);
+    const game = await getGameById(parsed.data.gameId);
     if (!game || !game.active) {
       return NextResponse.json({ error: "Selected game is invalid." }, { status: 400 });
     }
@@ -99,7 +99,7 @@ export async function POST(request: Request) {
     const buffer = Buffer.from(await photo.arrayBuffer());
     fs.writeFileSync(path.join(uploadsDir, filename), buffer);
 
-    const player = createPlayer({
+    const player = await createPlayer({
       fullName: parsed.data.fullName,
       birthdate: parsed.data.birthdate,
       email: parsed.data.email || null,

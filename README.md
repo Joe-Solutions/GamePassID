@@ -9,12 +9,23 @@ Online license database for tournament game players. Encoders sign in, capture p
 - Game selection for the license
 - Webcam profile capture (with file upload fallback)
 - Searchable licensed players directory and license cards
-- Local SQLite database (no separate DB server)
+- PostgreSQL via Prisma Migrate
 
 ## Quick start
 
+1. Create a PostgreSQL database (example name: `registration_hub`).
+2. Copy env and set your connection string:
+
+```bash
+cp .env.example .env
+```
+
+3. Install, migrate, seed, and run:
+
 ```bash
 npm install
+npm run db:migrate
+npm run db:seed
 npm run dev
 ```
 
@@ -25,10 +36,21 @@ Open [http://localhost:3000](http://localhost:3000).
 - Username: `encoder`
 - Password: `encoder123`
 
+## Database
+
+Prisma manages schema and migrations under `prisma/`.
+
+| Script | Purpose |
+| --- | --- |
+| `npm run db:migrate` | Apply migrations (`prisma migrate dev`) |
+| `npm run db:deploy` | Apply migrations in CI/production |
+| `npm run db:seed` | Seed games + demo encoder |
+| `npm run db:studio` | Open Prisma Studio |
+
+Uploaded photos are still stored under `data/uploads/photos/` (created automatically).
+
 ## Stack
 
 - Next.js (App Router) + TypeScript
 - Tailwind CSS
-- SQLite via `better-sqlite3`
-
-Data and uploaded photos are stored under `data/` (created automatically on first run). The database starts with no players — encoders register them from the console.
+- PostgreSQL + Prisma ORM

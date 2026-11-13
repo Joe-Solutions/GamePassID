@@ -1,0 +1,67 @@
+// Registration Hub — PostgreSQL via Prisma
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum PlayerCategory {
+  casual
+  amateur
+  student
+}
+
+enum PlayerStatus {
+  licensed
+  inactive
+}
+
+model Game {
+  id      Int      @id @default(autoincrement())
+  name    String
+  slug    String   @unique
+  active  Boolean  @default(true)
+  players Player[]
+
+  @@map("games")
+}
+
+model Encoder {
+  id           Int      @id @default(autoincrement())
+  username     String   @unique
+  passwordHash String   @map("password_hash")
+  displayName  String   @map("display_name")
+  players      Player[]
+
+  @@map("encoders")
+}
+
+model Player {
+  id         Int            @id @default(autoincrement())
+  licenseId  String         @unique @map("license_id")
+  fullName   String         @map("full_name")
+  birthdate  String
+  email      String?
+  phone      String?
+  address    String?
+  category   PlayerCategory
+  gameId     Int            @map("game_id")
+  gameOther  String?        @map("game_other")
+  photoPath  String?        @map("photo_path")
+  status     PlayerStatus   @default(licensed)
+  encodedBy  Int?           @map("encoded_by")
+  createdAt  DateTime       @default(now()) @map("created_at")
+
+  game    Game     @relation(fields: [gameId], references: [id])
+  encoder Encoder? @relation(fields: [encodedBy], references: [id])
+
+  @@index([licenseId], map: "idx_players_license")
+  @@index([fullName], map: "idx_players_name")
+  @@index([gameId], map: "idx_players_game")
+  @@index([category], map: "idx_players_category")
+  @@map("players")
+}

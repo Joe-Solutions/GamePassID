@@ -5,7 +5,7 @@ export interface Game {
   id: number;
   name: string;
   slug: string;
-  active: number;
+  active: boolean;
 }
 
 export interface Encoder {

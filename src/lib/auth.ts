@@ -36,7 +36,7 @@ export async function loginEncoder(
   username: string,
   password: string,
 ): Promise<Encoder | null> {
-  const encoder = getEncoderByUsername(username.trim());
+  const encoder = await getEncoderByUsername(username.trim());
   if (!encoder) return null;
   const ok = await bcrypt.compare(password, encoder.passwordHash);
   if (!ok) return null;
@@ -70,7 +70,7 @@ export async function getCurrentEncoder(): Promise<Encoder | null> {
   if (!token) return null;
   const session = decodeSession(token);
   if (!session) return null;
-  const encoder = getEncoderById(session.encoderId);
+  const encoder = await getEncoderById(session.encoderId);
   return encoder ?? null;
 }
 
