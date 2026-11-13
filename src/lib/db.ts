@@ -191,6 +191,62 @@ export async function createPlayer(input: {
   return mapPlayer(player);
 }
 
+export async function updatePlayer(
+  id: number,
+  input: {
+    fullName: string;
+    birthdate: string;
+    email?: string | null;
+    phone?: string | null;
+    address?: string | null;
+    category: PlayerCategory;
+    gameId: number;
+    gameOther?: string | null;
+    photoPath?: string | null;
+    status?: PlayerStatus;
+  },
+): Promise<Player | null> {
+  try {
+    const player = await prisma.player.update({
+      where: { id },
+      data: {
+        fullName: input.fullName,
+        birthdate: input.birthdate,
+        email: input.email ?? null,
+        phone: input.phone ?? null,
+        address: input.address ?? null,
+        category: input.category,
+        gameId: input.gameId,
+        gameOther: input.gameOther ?? null,
+        ...(input.photoPath !== undefined ? { photoPath: input.photoPath } : {}),
+        ...(input.status ? { status: input.status } : {}),
+      },
+      include: playerInclude,
+    });
+    return mapPlayer(player);
+  } catch {
+    return null;
+  }
+}
+
+export async function deletePlayer(id: number): Promise<{
+  deleted: boolean;
+  photoPath: string | null;
+}> {
+  try {
+    const existing = await prisma.player.findUnique({
+      where: { id },
+      select: { photoPath: true },
+    });
+    if (!existing) return { deleted: false, photoPath: null };
+
+    await prisma.player.delete({ where: { id } });
+    return { deleted: true, photoPath: existing.photoPath };
+  } catch {
+    return { deleted: false, photoPath: null };
+  }
+}
+
 export async function getEncoderByUsername(username: string) {
   return prisma.encoder.findUnique({
     where: { username },

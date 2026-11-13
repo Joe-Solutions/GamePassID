@@ -15,19 +15,41 @@ import {
 type Props = {
   games: Game[];
   encoderName: string;
+  initialPlayer?: Player | null;
+  onCancelEdit?: () => void;
+  onSaved?: (player: Player) => void;
 };
 
-export function RegistrationForm({ games, encoderName }: Props) {
-  const [fullName, setFullName] = useState("");
-  const [birthdate, setBirthdate] = useState("");
-  const [email, setEmail] = useState("");
-  const [phone, setPhone] = useState("");
-  const [address, setAddress] = useState("");
-  const [category, setCategory] = useState<PlayerCategory | "">("");
-  const [gameId, setGameId] = useState<number | "">("");
-  const [gameOther, setGameOther] = useState("");
+export function RegistrationForm({
+  games,
+  encoderName,
+  initialPlayer = null,
+  onCancelEdit,
+  onSaved,
+}: Props) {
+  const isEditing = Boolean(initialPlayer);
+
+  const [fullName, setFullName] = useState(initialPlayer?.fullName ?? "");
+  const [birthdate, setBirthdate] = useState(initialPlayer?.birthdate ?? "");
+  const [email, setEmail] = useState(initialPlayer?.email ?? "");
+  const [phone, setPhone] = useState(initialPlayer?.phone ?? "");
+  const [address, setAddress] = useState(initialPlayer?.address ?? "");
+  const [category, setCategory] = useState<PlayerCategory | "">(
+    initialPlayer?.category ?? "",
+  );
+  const [gameId, setGameId] = useState<number | "">(
+    initialPlayer?.gameId ?? "",
+  );
+  const [gameOther, setGameOther] = useState(initialPlayer?.gameOther ?? "");
   const [photoBlob, setPhotoBlob] = useState<Blob | null>(null);
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(
+    initialPlayer?.photoPath
+      ? `/api/photos/${initialPlayer.photoPath}`
+      : null,
+  );
+  const [existingPhoto, setExistingPhoto] = useState(
+    Boolean(initialPlayer?.photoPath),
+  );
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [created, setCreated] = useState<Player | null>(null);
@@ -38,8 +60,10 @@ export function RegistrationForm({ games, encoderName }: Props) {
   );
   const isOthers = selectedGame?.slug === OTHERS_GAME_SLUG;
 
+  const hasPhoto = Boolean(photoBlob || existingPhoto);
+
   const canSubmit = useMemo(() => {
-    if (!fullName || !birthdate || !category || !gameId || !photoBlob || submitting) {
+    if (!fullName || !birthdate || !category || !gameId || !hasPhoto || submitting) {
       return false;
     }
     if (isOthers && !gameOther.trim()) return false;
@@ -49,16 +73,19 @@ export function RegistrationForm({ games, encoderName }: Props) {
     birthdate,
     category,
     gameId,
-    photoBlob,
+    hasPhoto,
     submitting,
     isOthers,
     gameOther,
   ]);
 
   function clearPhoto() {
-    if (previewUrl) URL.revokeObjectURL(previewUrl);
+    if (previewUrl && previewUrl.startsWith("blob:")) {
+      URL.revokeObjectURL(previewUrl);
+    }
     setPhotoBlob(null);
     setPreviewUrl(null);
+    setExistingPhoto(false);
   }
 
   function onGameChange(value: string) {
@@ -72,7 +99,7 @@ export function RegistrationForm({ games, encoderName }: Props) {
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!canSubmit || !photoBlob || !category || !gameId) return;
+    if (!canSubmit || !category || !gameId) return;
 
     setSubmitting(true);
     setError(null);
@@ -87,19 +114,38 @@ export function RegistrationForm({ games, encoderName }: Props) {
       body.set("category", category);
       body.set("gameId", String(gameId));
       body.set("gameOther", isOthers ? gameOther.trim() : "");
-      body.set("photo", photoBlob, "profile.jpg");
+      if (photoBlob) {
+        body.set("photo", photoBlob, "profile.jpg");
+      }
 
-      const res = await fetch("/api/players", {
-        method: "POST",
-        body,
-      });
+      const res = await fetch(
+        isEditing ? `/api/players/${initialPlayer!.id}` : "/api/players",
+        {
+          method: isEditing ? "PATCH" : "POST",
+          body,
+        },
+      );
       const data = await res.json();
       if (!res.ok) {
-        throw new Error(data.error || "Registration failed");
+        throw new Error(
+          data.error || (isEditing ? "Update failed" : "Registration failed"),
+        );
       }
-      setCreated(data.player as Player);
+
+      const player = data.player as Player;
+      onSaved?.(player);
+
+      if (!isEditing) {
+        setCreated(player);
+      }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Registration failed");
+      setError(
+        err instanceof Error
+          ? err.message
+          : isEditing
+            ? "Update failed"
+            : "Registration failed",
+      );
     } finally {
       setSubmitting(false);
     }
@@ -163,7 +209,9 @@ export function RegistrationForm({ games, encoderName }: Props) {
             </div>
             <div>
               <dt className="text-[var(--fg-muted)]">Category</dt>
-              <dd className="mt-1 font-semibold capitalize">{created.category} player</dd>
+              <dd className="mt-1 font-semibold capitalize">
+                {created.category} player
+              </dd>
             </div>
             <div>
               <dt className="text-[var(--fg-muted)]">Status</dt>
@@ -188,12 +236,36 @@ export function RegistrationForm({ games, encoderName }: Props) {
 
   return (
     <form onSubmit={onSubmit} className="space-y-6">
+      {isEditing && (
+        <div className="panel flex flex-wrap items-center justify-between gap-3 border-[rgba(45,212,168,0.25)] bg-[var(--accent-dim)] p-4 sm:px-5">
+          <div>
+            <p className="text-sm font-semibold text-[var(--accent)]">
+              Editing {initialPlayer?.fullName}
+            </p>
+            <p className="mt-0.5 font-mono text-xs text-[var(--fg-muted)]">
+              {initialPlayer?.licenseId}
+            </p>
+          </div>
+          {onCancelEdit && (
+            <button
+              type="button"
+              className="btn btn-ghost !px-4 !py-2 text-sm"
+              onClick={onCancelEdit}
+            >
+              Cancel
+            </button>
+          )}
+        </div>
+      )}
+
       <div className="grid gap-5 xl:grid-cols-2">
         <section className="panel flex h-full flex-col gap-5 p-5 sm:p-6 fade-up">
           <div>
             <h2 className="display text-2xl font-bold">Player identity</h2>
             <p className="mt-1 text-sm text-[var(--fg-muted)]">
-              Enter the player details before tournament play.
+              {isEditing
+                ? "Update the player details on file."
+                : "Enter the player details before tournament play."}
             </p>
           </div>
 
@@ -334,16 +406,21 @@ export function RegistrationForm({ games, encoderName }: Props) {
           <div>
             <h2 className="display text-2xl font-bold">Profile photo</h2>
             <p className="mt-1 text-sm text-[var(--fg-muted)]">
-              Capture a live photo for the player license card.
+              {isEditing
+                ? "Keep the current photo or capture a new one."
+                : "Capture a live photo for the player license card."}
             </p>
           </div>
           <PhotoCapture
             value={photoBlob}
             previewUrl={previewUrl}
             onCapture={(blob, url) => {
-              if (previewUrl) URL.revokeObjectURL(previewUrl);
+              if (previewUrl && previewUrl.startsWith("blob:")) {
+                URL.revokeObjectURL(previewUrl);
+              }
               setPhotoBlob(blob);
               setPreviewUrl(url);
+              setExistingPhoto(false);
             }}
             onClear={clearPhoto}
           />
@@ -360,8 +437,23 @@ export function RegistrationForm({ games, encoderName }: Props) {
         <p className="text-sm text-[var(--fg-muted)]">
           Signed in as {encoderName}
         </p>
+        {isEditing && onCancelEdit && (
+          <button
+            type="button"
+            className="btn btn-ghost"
+            onClick={onCancelEdit}
+          >
+            Cancel
+          </button>
+        )}
         <button type="submit" className="btn btn-primary" disabled={!canSubmit}>
-          {submitting ? "Registering…" : "Register new player"}
+          {submitting
+            ? isEditing
+              ? "Saving…"
+              : "Registering…"
+            : isEditing
+              ? "Save changes"
+              : "Register new player"}
         </button>
       </div>
     </form>
