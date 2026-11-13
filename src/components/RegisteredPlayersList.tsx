@@ -26,10 +26,6 @@ export function RegisteredPlayersList({
   const [deletingId, setDeletingId] = useState<number | null>(null);
 
   useEffect(() => {
-    setPlayers(initialPlayers);
-  }, [initialPlayers]);
-
-  useEffect(() => {
     let cancelled = false;
     const handle = window.setTimeout(async () => {
       setPending(true);
