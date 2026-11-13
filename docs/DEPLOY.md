@@ -55,8 +55,10 @@ GRANT ALL ON SCHEMA public TO gamepassid;
 Connection string shape (put real user/password only in the host `.env`, never in git):
 
 ```text
-DATABASE_URL="postgresql://USER:PASSWORD@tradeko.chssuuoa2xdc.ap-southeast-1.rds.amazonaws.com:5432/gamepassid?schema=public&sslmode=require"
+DATABASE_URL="postgresql://USER:PASSWORD@tradeko.chssuuoa2xdc.ap-southeast-1.rds.amazonaws.com:5432/gamepassid?schema=public&sslmode=require&uselibpqcompat=true"
 ```
+
+Always keep quotes around `DATABASE_URL` (the `&` in the query string breaks unquoted `source .env` / PM2). Without TLS, RDS returns `pg_hba … no encryption` and Prisma surfaces it as `P1010`.
 
 Confirm the RDS security group already allows the EC2 SG (same as EOG).
 
@@ -74,7 +76,7 @@ cd /var/www/GamePassID
 # git clone git@github.com:Joe-Solutions/GamePassID.git .
 
 cat > /var/www/GamePassID/.env <<'EOF'
-DATABASE_URL="postgresql://USER:PASSWORD@tradeko.chssuuoa2xdc.ap-southeast-1.rds.amazonaws.com:5432/gamepassid?schema=public&sslmode=require"
+DATABASE_URL="postgresql://USER:PASSWORD@tradeko.chssuuoa2xdc.ap-southeast-1.rds.amazonaws.com:5432/gamepassid?schema=public&sslmode=require&uselibpqcompat=true"
 AUTH_SECRET="paste-a-long-random-string"
 NODE_ENV=production
 PORT=3210
@@ -92,9 +94,11 @@ mkdir -p /var/www/GamePassID/data/uploads/photos
 ```bash
 sudo cp /var/www/GamePassID/deploy/nginx-gp-register.joesolutions.ph.conf \
   /etc/nginx/conf.d/gp-register.joesolutions.ph.conf
-sudo nginx -t && sudo systemctl reload nginx
-sudo certbot --nginx -d gp-register.joesolutions.ph
+sudo nginx -t && sudo nginx -s reload
+sudo certbot --nginx -d gp-register.joesolutions.ph --non-interactive --agree-tos --register-unsafely-without-email --redirect
 ```
+
+(`systemctl reload nginx` can fail with a NAMESPACE unit error on this box; `nginx -s reload` is the reliable path.)
 
 ---
 
