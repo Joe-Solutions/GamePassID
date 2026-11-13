@@ -10,13 +10,20 @@ import {
 
 type Props = {
   initialPlayers: Player[];
+  onEdit: (player: Player) => void;
+  onDeleted: (playerId: number) => void;
 };
 
-export function RegisteredPlayersList({ initialPlayers }: Props) {
+export function RegisteredPlayersList({
+  initialPlayers,
+  onEdit,
+  onDeleted,
+}: Props) {
   const [query, setQuery] = useState("");
   const [players, setPlayers] = useState(initialPlayers);
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<number | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -45,6 +52,29 @@ export function RegisteredPlayersList({ initialPlayers }: Props) {
     };
   }, [query]);
 
+  async function onDelete(player: Player) {
+    const confirmed = window.confirm(
+      `Delete ${player.fullName} (${player.licenseId})? This cannot be undone.`,
+    );
+    if (!confirmed) return;
+
+    setDeletingId(player.id);
+    setError(null);
+    try {
+      const res = await fetch(`/api/players/${player.id}`, { method: "DELETE" });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        throw new Error(data.error || "Could not delete player");
+      }
+      setPlayers((prev) => prev.filter((p) => p.id !== player.id));
+      onDeleted(player.id);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not delete player");
+    } finally {
+      setDeletingId(null);
+    }
+  }
+
   return (
     <div className="space-y-5 fade-up">
       <div className="panel p-5 sm:p-6">
@@ -71,12 +101,13 @@ export function RegisteredPlayersList({ initialPlayers }: Props) {
           pending ? "opacity-70" : ""
         }`}
       >
-        <div className="hidden grid-cols-[1.4fr_0.8fr_0.9fr_0.8fr_0.7fr] gap-3 border-b border-[var(--line)] bg-white/[0.02] px-4 py-3 text-xs font-semibold uppercase tracking-[0.12em] text-[var(--fg-muted)] sm:grid">
+        <div className="hidden grid-cols-[1.3fr_0.7fr_0.85fr_0.75fr_0.55fr_0.9fr] gap-3 border-b border-[var(--line)] bg-white/[0.02] px-4 py-3 text-xs font-semibold uppercase tracking-[0.12em] text-[var(--fg-muted)] sm:grid">
           <span>Player</span>
           <span>License</span>
           <span>Game</span>
           <span>Category</span>
           <span>Status</span>
+          <span>Actions</span>
         </div>
 
         {players.length === 0 ? (
@@ -90,11 +121,11 @@ export function RegisteredPlayersList({ initialPlayers }: Props) {
                 key={player.id}
                 className="border-b border-[var(--line)] last:border-b-0"
               >
-                <Link
-                  href={`/players/${player.id}`}
-                  className="grid gap-2 px-4 py-4 transition hover:bg-white/[0.02] sm:grid-cols-[1.4fr_0.8fr_0.9fr_0.8fr_0.7fr] sm:items-center sm:gap-3"
-                >
-                  <div className="flex items-center gap-3">
+                <div className="grid gap-3 px-4 py-4 sm:grid-cols-[1.3fr_0.7fr_0.85fr_0.75fr_0.55fr_0.9fr] sm:items-center sm:gap-3">
+                  <Link
+                    href={`/players/${player.id}`}
+                    className="flex items-center gap-3 transition hover:opacity-90"
+                  >
                     <div className="h-11 w-11 overflow-hidden rounded-full border border-[var(--line-strong)] bg-black/30">
                       {player.photoPath ? (
                         // eslint-disable-next-line @next/next/no-img-element
@@ -115,7 +146,7 @@ export function RegisteredPlayersList({ initialPlayers }: Props) {
                         {player.licenseId}
                       </p>
                     </div>
-                  </div>
+                  </Link>
                   <p className="hidden font-mono text-sm text-[var(--accent)] sm:block">
                     {player.licenseId}
                   </p>
@@ -128,7 +159,24 @@ export function RegisteredPlayersList({ initialPlayers }: Props) {
                   <p className="text-sm capitalize text-[var(--accent)]">
                     {player.status}
                   </p>
-                </Link>
+                  <div className="flex flex-wrap gap-2">
+                    <button
+                      type="button"
+                      className="btn btn-ghost !px-3 !py-1.5 text-sm"
+                      onClick={() => onEdit(player)}
+                    >
+                      Edit
+                    </button>
+                    <button
+                      type="button"
+                      className="btn !border-[rgba(240,113,120,0.45)] !px-3 !py-1.5 text-sm text-[var(--danger)] hover:!bg-[rgba(240,113,120,0.08)]"
+                      disabled={deletingId === player.id}
+                      onClick={() => onDelete(player)}
+                    >
+                      {deletingId === player.id ? "Deleting…" : "Delete"}
+                    </button>
+                  </div>
+                </div>
               </li>
             ))}
           </ul>

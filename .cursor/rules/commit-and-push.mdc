@@ -1,0 +1,16 @@
+---
+description: Commit-and-push workflow — pull main, feature branch, push, return to main
+alwaysApply: true
+---
+
+# Commit and push workflow
+
+When the user says **commit and push** (or equivalent), always follow this sequence:
+
+1. **Update main** — checkout `main` if needed, then `git pull origin main` (stash local changes first if pull would fail; restore after).
+2. **Create a new local branch** from updated `main` with a short descriptive name for the work (e.g. `feat/player-edit-delete`).
+3. **Commit** all relevant changes on that branch (follow normal commit safety rules; never commit secrets).
+4. **Push** the new branch with upstream: `git push -u origin HEAD`.
+5. **Switch back to main**: `git checkout main`.
+
+Do **not** commit directly on `main`. Do **not** stay on the feature branch after a successful push unless the user asks.
