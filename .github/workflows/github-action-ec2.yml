@@ -1,0 +1,144 @@
+name: Deploy
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "GamePassID Deployment Environment"
+        required: false
+        default: "production"
+        type: choice
+        options:
+          - production
+
+# Same shared EC2 as EOG / TradeKo (barter) — queue deploy SSH so the box is not slammed.
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  DEPLOY_ENV: ${{ vars.DEPLOY_ENV }}
+  AWS_REGION: ${{ secrets.AWS_REGION }}
+  APP_DIR: /var/www/GamePassID
+
+jobs:
+  deploy:
+    name: Deploy to EC2
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    steps:
+      - name: Checkout the repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GH_SECRET_KEY }}
+
+      - name: Debug DEPLOY_ENV
+        run: |
+          echo "DEPLOY_ENV is set to : $DEPLOY_ENV"
+
+      - name: Get GitHub runner IP
+        id: ip
+        shell: bash
+        run: |
+          IPV4="$(curl -4s --max-time 10 https://api.ipify.org || true)"
+          echo "ipv4=$IPV4" >> "$GITHUB_OUTPUT"
+
+      - name: Validate runner IP
+        id: ipcheck
+        run: |
+          if [ -z "${{ steps.ip.outputs.ipv4 }}" ]; then
+            echo "valid=false" >> "$GITHUB_OUTPUT"
+            echo "Runner IPv4 is empty. Skipping SG whitelist/revoke steps."
+          else
+            echo "valid=true" >> "$GITHUB_OUTPUT"
+            echo "Runner IPv4: ${{ steps.ip.outputs.ipv4 }}"
+          fi
+
+      - name: Whitelist Runner IP in AWS Security Group
+        if: ${{ vars.DEPLOY_ENV == 'production' && steps.ipcheck.outputs.valid == 'true' }}
+        run: |
+          aws ec2 authorize-security-group-ingress \
+            --group-id ${{ secrets.AWS_SG_ID }} \
+            --protocol tcp \
+            --port 22 \
+            --cidr ${{ steps.ip.outputs.ipv4 }}/32
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: ${{ secrets.AWS_REGION }}
+
+      - name: Execute deployment script on EC2 for Production
+        if: ${{ vars.DEPLOY_ENV == 'production' }}
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST_DNS_PRODUCTION }}
+          username: ${{ secrets.EC2_USER_PRODUCTION }}
+          key: ${{ secrets.EC2_SSH_KEY_PRODUCTION }}
+          timeout: 60s
+          command_timeout: 45m
+          script: |
+            set -e
+            APP_DIR="/var/www/GamePassID"
+
+            sudo mkdir -p "$APP_DIR"
+            sudo chown -R "$USER:$USER" "$APP_DIR"
+            git config --global --add safe.directory "$APP_DIR"
+
+            cd "$APP_DIR"
+
+            if [ ! -d ".git" ]; then
+              echo "Folder is not a git repo. Cloning..."
+              sudo rm -rf "$APP_DIR"/* "$APP_DIR"/.[!.]* "$APP_DIR"/..?* 2>/dev/null || true
+              git clone https://${{ secrets.GH_SECRET_KEY }}@github.com/Joe-Solutions/GamePassID.git .
+              git checkout ${{ github.ref_name }}
+            else
+              echo "Updating existing repo on branch: ${{ github.ref_name }}..."
+              git fetch origin
+              git checkout ${{ github.ref_name }}
+              git pull origin ${{ github.ref_name }}
+            fi
+
+            if [ ! -f .env ]; then
+              echo "ERROR: Missing $APP_DIR/.env (DATABASE_URL, AUTH_SECRET). Create it once on the host before deploy."
+              exit 1
+            fi
+
+            export NVM_DIR="$HOME/.nvm"
+            [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
+            source ~/.bashrc || true
+            nvm use 24.22.1 || nvm install 24.22.1
+
+            if [ -f package-lock.json ]; then
+              npm ci
+            else
+              npm install
+            fi
+
+            npx prisma generate
+            npm run db:deploy
+            npm run build
+
+            mkdir -p data/uploads/photos
+
+            pm2 startOrReload "$APP_DIR/ecosystem.config.cjs" --update-env
+            pm2 save
+
+            curl -fsS "http://127.0.0.1:3210/" >/dev/null
+            echo "GamePassID healthy on :3210"
+
+      - name: Revoke Runner IP from AWS Security Group
+        if: ${{ always() && steps.ipcheck.outputs.valid == 'true' }}
+        run: |
+          aws ec2 revoke-security-group-ingress \
+            --group-id ${{ secrets.AWS_SG_ID }} \
+            --protocol tcp \
+            --port 22 \
+            --cidr ${{ steps.ip.outputs.ipv4 }}/32
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: ${{ secrets.AWS_REGION }}
