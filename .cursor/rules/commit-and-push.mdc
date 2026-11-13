@@ -5,12 +5,26 @@ alwaysApply: true
 
 # Commit and push workflow
 
-When the user says **commit and push** (or equivalent), always follow this sequence:
+When the user says **commit and push** (or equivalent), follow this sequence:
+
+## New work (default)
 
 1. **Update main** — checkout `main` if needed, then `git pull origin main` (stash local changes first if pull would fail; restore after).
-2. **Create a new local branch** from updated `main` with a short descriptive name for the work (e.g. `feat/player-edit-delete`).
-3. **Commit** all relevant changes on that branch (follow normal commit safety rules; never commit secrets).
-4. **Push** the new branch with upstream: `git push -u origin HEAD`.
+2. **Create a new local branch** from updated `main` with a short descriptive name for the work.
+3. **Commit** all relevant changes on that branch (never commit secrets).
+4. **Push** with upstream: `git push -u origin HEAD`.
 5. **Switch back to main**: `git checkout main`.
 
 Do **not** commit directly on `main`. Do **not** stay on the feature branch after a successful push unless the user asks.
+
+## Fixes on an open / unmerged branch
+
+If the changes fix a problem on a branch that is **already pushed and not yet merged** (CI failure, review feedback, bug on that PR branch):
+
+1. Checkout **that same branch** (do **not** create another local branch).
+2. Pull/update it if needed (`git pull`), optionally merge/rebase latest `main` when required.
+3. Commit the fix on that branch.
+4. Push to the **same remote branch** (`git push`).
+5. Switch back to `main`.
+
+Never open a parallel “fix” branch for an unmerged PR — keep the PR branch green by pushing fixes there.
