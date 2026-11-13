@@ -12,6 +12,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // PM2 host config (CommonJS require) — not app source
+    "ecosystem.config.cjs",
   ]),
 ]);
 

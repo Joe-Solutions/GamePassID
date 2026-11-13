@@ -125,6 +125,13 @@ jobs:
 
             mkdir -p data/uploads/photos
 
+            # Quote DATABASE_URL in .env (values contain &). ecosystem.config.cjs loads it;
+            # also source here so --update-env does not drop SSL query params.
+            set -a
+            # shellcheck disable=SC1091
+            . "$APP_DIR/.env"
+            set +a
+
             pm2 startOrReload "$APP_DIR/ecosystem.config.cjs" --update-env
             pm2 save
 
