@@ -135,7 +135,20 @@ jobs:
             pm2 startOrReload "$APP_DIR/ecosystem.config.cjs" --update-env
             pm2 save
 
-            curl -fsS "http://127.0.0.1:3210/" >/dev/null
+            # Next needs a few seconds after PM2 reload before :3210 accepts.
+            ok=0
+            for i in $(seq 1 15); do
+              if curl -fsS "http://127.0.0.1:3210/" >/dev/null; then
+                ok=1
+                break
+              fi
+              sleep 2
+            done
+            if [ "$ok" != "1" ]; then
+              echo "GamePassID health check failed on :3210"
+              pm2 logs gamepassid --lines 40 --nostream || true
+              exit 1
+            fi
             echo "GamePassID healthy on :3210"
 
       - name: Revoke Runner IP from AWS Security Group
