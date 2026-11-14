@@ -10,10 +10,10 @@ import {
   statusLabel,
   type Game,
   type Player,
-  type PlayerCategory,
 } from "@/lib/types";
 
 const STORAGE_KEY = "rh_my_license_id";
+const SELF_REGISTER_CATEGORY = "casual" as const;
 
 type Props = {
   games: Game[];
@@ -25,8 +25,11 @@ export function SelfRegistrationForm({ games }: Props) {
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [address, setAddress] = useState("");
-  const [category, setCategory] = useState<PlayerCategory | "">("");
   const [gameId, setGameId] = useState<number | "">("");
+  const category = SELF_REGISTER_CATEGORY;
+  const casualCategory = PLAYER_CATEGORIES.find(
+    (item) => item.value === SELF_REGISTER_CATEGORY,
+  );
   const [gameOther, setGameOther] = useState("");
   const [photoBlob, setPhotoBlob] = useState<Blob | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -42,21 +45,12 @@ export function SelfRegistrationForm({ games }: Props) {
   const isOthers = selectedGame?.slug === OTHERS_GAME_SLUG;
 
   const canSubmit = useMemo(() => {
-    if (!fullName || !birthdate || !category || !gameId || !photoBlob || submitting) {
+    if (!fullName || !birthdate || !gameId || !photoBlob || submitting) {
       return false;
     }
     if (isOthers && !gameOther.trim()) return false;
     return true;
-  }, [
-    fullName,
-    birthdate,
-    category,
-    gameId,
-    photoBlob,
-    submitting,
-    isOthers,
-    gameOther,
-  ]);
+  }, [fullName, birthdate, gameId, photoBlob, submitting, isOthers, gameOther]);
 
   function clearPhoto() {
     if (previewUrl) URL.revokeObjectURL(previewUrl);
@@ -75,7 +69,7 @@ export function SelfRegistrationForm({ games }: Props) {
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!canSubmit || !photoBlob || !category || !gameId) return;
+    if (!canSubmit || !photoBlob || !gameId) return;
 
     setSubmitting(true);
     setError(null);
@@ -116,7 +110,6 @@ export function SelfRegistrationForm({ games }: Props) {
     setEmail("");
     setPhone("");
     setAddress("");
-    setCategory("");
     setGameId("");
     setGameOther("");
     clearPhoto();
@@ -287,40 +280,20 @@ export function SelfRegistrationForm({ games }: Props) {
           <div>
             <h2 className="display text-2xl font-bold">Player category</h2>
             <p className="mt-1 text-sm text-[var(--fg-muted)]">
-              Choose Casual, Amateur, or Student.
+              Self-registration is for Casual players only. Amateur and Student
+              categories are set by an encoder.
             </p>
           </div>
 
-          <div className="grid gap-3">
-            {PLAYER_CATEGORIES.map((item) => {
-              const selected = category === item.value;
-              return (
-                <label
-                  key={item.value}
-                  className={`flex cursor-pointer items-start gap-3 rounded-xl border px-4 py-3 transition ${
-                    selected
-                      ? "border-[rgba(45,212,168,0.55)] bg-[var(--accent-dim)]"
-                      : "border-[var(--line-strong)] hover:border-[rgba(45,212,168,0.3)]"
-                  }`}
-                >
-                  <input
-                    type="radio"
-                    name="category"
-                    value={item.value}
-                    checked={selected}
-                    onChange={() => setCategory(item.value)}
-                    className="mt-1 accent-[var(--accent)]"
-                    required
-                  />
-                  <span>
-                    <span className="block font-semibold">{item.label}</span>
-                    <span className="mt-0.5 block text-sm text-[var(--fg-muted)]">
-                      {item.description}
-                    </span>
-                  </span>
-                </label>
-              );
-            })}
+          <div className="rounded-xl border border-[rgba(45,212,168,0.55)] bg-[var(--accent-dim)] px-4 py-3">
+            <p className="font-semibold">
+              {casualCategory?.label ?? "Casual Player"}
+            </p>
+            <p className="mt-0.5 text-sm text-[var(--fg-muted)]">
+              {casualCategory?.description ??
+                "Recreational play and friendly competition"}
+            </p>
+            <input type="hidden" name="category" value={category} />
           </div>
         </section>
 
