@@ -12,7 +12,6 @@ const registerSchema = z.object({
   email: z.string().email().optional().or(z.literal("")),
   phone: z.string().trim().max(40).optional().or(z.literal("")),
   address: z.string().trim().max(200).optional().or(z.literal("")),
-  category: z.enum(["casual", "amateur", "student"]),
   gameId: z.coerce.number().int().positive(),
   gameOther: z.string().trim().max(120).optional().or(z.literal("")),
 });
@@ -26,7 +25,6 @@ export async function POST(request: Request) {
       email: form.get("email") ?? "",
       phone: form.get("phone") ?? "",
       address: form.get("address") ?? "",
-      category: form.get("category"),
       gameId: form.get("gameId"),
       gameOther: form.get("gameOther") ?? "",
     });
@@ -81,7 +79,7 @@ export async function POST(request: Request) {
       email: parsed.data.email || null,
       phone: parsed.data.phone || null,
       address: parsed.data.address || null,
-      category: parsed.data.category,
+      category: "casual",
       gameId: parsed.data.gameId,
       gameOther: isOthers ? gameOther : null,
       photoPath: filename,
