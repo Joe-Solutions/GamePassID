@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { SiteHeader } from "@/components/SiteHeader";
 import { getCurrentEncoder } from "@/lib/auth";
 import { getPlayerById } from "@/lib/db";
-import { categoryLabel, displayGameLabel } from "@/lib/types";
+import { categoryLabel, displayGameLabel, statusLabel } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
 
@@ -80,8 +80,14 @@ export default async function PlayerDetailPage({ params }: Params) {
                 <dt className="text-xs uppercase tracking-[0.14em] text-[var(--fg-muted)]">
                   Status
                 </dt>
-                <dd className="mt-1 text-lg font-semibold capitalize text-[var(--accent)]">
-                  {player.status}
+                <dd
+                  className={`mt-1 text-lg font-semibold ${
+                    player.status === "licensed"
+                      ? "text-[var(--accent)]"
+                      : "text-[var(--fg-soft)]"
+                  }`}
+                >
+                  {statusLabel(player.status)}
                 </dd>
               </div>
               <div>

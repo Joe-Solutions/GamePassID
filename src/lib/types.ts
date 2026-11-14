@@ -1,5 +1,5 @@
 export type PlayerCategory = "casual" | "amateur" | "student";
-export type PlayerStatus = "licensed" | "inactive";
+export type PlayerStatus = "registered" | "licensed" | "inactive";
 
 export interface Game {
   id: number;
@@ -74,4 +74,17 @@ export function categoryLabel(category: PlayerCategory): string {
   return (
     PLAYER_CATEGORIES.find((c) => c.value === category)?.label ?? category
   );
+}
+
+export function statusLabel(status: PlayerStatus): string {
+  switch (status) {
+    case "registered":
+      return "Registered";
+    case "licensed":
+      return "Licensed";
+    case "inactive":
+      return "Inactive";
+    default:
+      return status;
+  }
 }

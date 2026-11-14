@@ -16,6 +16,7 @@ enum PlayerCategory {
 }
 
 enum PlayerStatus {
+  registered
   licensed
   inactive
 }
@@ -52,7 +53,7 @@ model Player {
   gameId     Int            @map("game_id")
   gameOther  String?        @map("game_other")
   photoPath  String?        @map("photo_path")
-  status     PlayerStatus   @default(licensed)
+  status     PlayerStatus   @default(registered)
   encodedBy  Int?           @map("encoded_by")
   createdAt  DateTime       @default(now()) @map("created_at")
 
