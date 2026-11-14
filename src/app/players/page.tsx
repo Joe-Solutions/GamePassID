@@ -3,7 +3,7 @@ import { Suspense } from "react";
 import { SiteHeader } from "@/components/SiteHeader";
 import { PlayersFilters } from "@/components/PlayersFilters";
 import { getCurrentEncoder } from "@/lib/auth";
-import { listGames, listPlayers } from "@/lib/db";
+import { countPlayersByStatus, listGames, listPlayers } from "@/lib/db";
 import {
   categoryLabel,
   displayGameLabel,
@@ -36,10 +36,17 @@ export default async function PlayersPage({
     status: (params.status as PlayerStatus | undefined) || undefined,
   });
 
+  const [registeredTotal, licensedTotal] = encoder
+    ? await Promise.all([
+        countPlayersByStatus("registered"),
+        countPlayersByStatus("licensed"),
+      ])
+    : [0, 0];
+
   return (
     <>
       <SiteHeader encoder={encoder} />
-      <main className="relative z-10 mx-auto w-full max-w-[90rem] flex-1 px-5 py-8 sm:px-8 sm:py-10">
+      <main className="relative z-10 mx-auto w-full min-w-0 max-w-[90rem] flex-1 px-4 py-6 sm:px-8 sm:py-10">
         <div className="fade-up">
           <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--accent)]">
             Licensed database
@@ -52,6 +59,33 @@ export default async function PlayersPage({
             play.
           </p>
         </div>
+
+        {encoder && (
+          <div className="mt-8 grid gap-4 sm:grid-cols-2">
+            <div className="panel p-5 sm:p-6">
+              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--fg-muted)]">
+                Total Registered Players
+              </p>
+              <p className="display mt-3 text-4xl font-bold tracking-tight text-[var(--fg)]">
+                {registeredTotal}
+              </p>
+              <p className="mt-2 text-sm text-[var(--fg-muted)]">
+                Players in the hub who are not yet licensed
+              </p>
+            </div>
+            <div className="panel p-5 sm:p-6">
+              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--fg-muted)]">
+                Total Licensed Players
+              </p>
+              <p className="display mt-3 text-4xl font-bold tracking-tight text-[var(--accent)]">
+                {licensedTotal}
+              </p>
+              <p className="mt-2 text-sm text-[var(--fg-muted)]">
+                Players marked as Licensed by an encoder
+              </p>
+            </div>
+          </div>
+        )}
 
         <div className="panel mt-8 p-5 fade-up-delay">
           <Suspense fallback={<div className="h-24 animate-pulse rounded-xl bg-white/5" />}>
