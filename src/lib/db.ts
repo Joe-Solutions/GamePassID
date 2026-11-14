@@ -316,3 +316,9 @@ export async function getEncoderById(id: number) {
 export async function countPlayers(): Promise<number> {
   return prisma.player.count();
 }
+
+export async function countPlayersByStatus(
+  status: PlayerStatus,
+): Promise<number> {
+  return prisma.player.count({ where: { status } });
+}
