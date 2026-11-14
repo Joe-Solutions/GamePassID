@@ -139,3 +139,22 @@ cd /var/www/GamePassID && npm run db:seed
 ```
 
 Demo encoder (change password after first login in production): `encoder` / `encoder123`.
+
+---
+
+## 7. Troubleshooting
+
+### Deploy fails with `ENOSPC: no space left on device`
+
+The shared EC2 disk is full (often during `npm ci` under `/var/www/GamePassID/node_modules`). The deploy workflow cleans `.next`, `node_modules`, and the npm cache first, but the host may still need manual space:
+
+```bash
+df -h
+sudo du -xh /var/www --max-depth=2 | sort -h | tail
+# Typical cleanup (do not delete live .env or data/uploads):
+rm -rf /var/www/GamePassID/.next /var/www/GamePassID/node_modules
+npm cache clean --force
+# Also check other apps, docker images, and journal logs on the shared box.
+```
+
+Then re-run the **Deploy** workflow (`workflow_dispatch` or push to `main`).
