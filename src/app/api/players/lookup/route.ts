@@ -22,7 +22,7 @@ export async function POST(request: Request) {
 
     if (!parsed.success) {
       return NextResponse.json(
-        { error: "Enter a license ID, or your full name and birthdate." },
+        { error: "Enter a Registration ID, or your full name and birthdate." },
         { status: 400 },
       );
     }

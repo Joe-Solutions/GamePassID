@@ -79,12 +79,22 @@ export function categoryLabel(category: PlayerCategory): string {
 export function statusLabel(status: PlayerStatus): string {
   switch (status) {
     case "registered":
-      return "Registered";
+      return "Player is not yet licensed";
     case "licensed":
-      return "Licensed";
+      return "Licensed Player";
     case "inactive":
       return "Inactive";
     default:
       return status;
   }
+}
+
+export function playerIdLabel(status: PlayerStatus): string {
+  return status === "licensed" ? "Licensed ID" : "Registration ID";
+}
+
+export function playerCardEyebrow(status: PlayerStatus): string {
+  return status === "licensed"
+    ? "Official player license"
+    : "Player registration";
 }

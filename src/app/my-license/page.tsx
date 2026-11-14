@@ -11,17 +11,18 @@ export default async function MyLicensePage() {
   return (
     <>
       <SiteHeader encoder={encoder} />
-      <main className="relative z-10 mx-auto w-full max-w-4xl flex-1 px-5 py-8 sm:px-8 sm:py-10">
+      <main className="relative z-10 mx-auto w-full min-w-0 max-w-4xl flex-1 px-4 py-6 sm:px-8 sm:py-10">
         <div className="fade-up mb-8">
           <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--accent)]">
             Already registered?
           </p>
-          <h1 className="display mt-2 text-4xl font-bold tracking-tight">
-            Show my license ID
+          <h1 className="display mt-2 text-3xl font-bold tracking-tight sm:text-4xl">
+            Show my Registration ID
           </h1>
           <p className="mt-2 max-w-2xl text-[var(--fg-muted)]">
-            Look up your registration with your license ID, or your full name
-            and birthdate, to prove you are already in Registration Hub.
+            Look up your registration with your Registration ID, or your full
+            name and birthdate. If an encoder has licensed you, your Licensed ID
+            will appear here.
           </p>
           <p className="mt-3 text-sm text-[var(--fg-soft)]">
             New here?{" "}

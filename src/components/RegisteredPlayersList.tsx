@@ -120,7 +120,7 @@ export function RegisteredPlayersList({
             id="registeredPlayerSearch"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search by name, player ID, email, or other game"
+            placeholder="Search by name, registration ID, email, or other game"
             autoComplete="off"
           />
         </div>
@@ -139,7 +139,7 @@ export function RegisteredPlayersList({
       >
         <div className="hidden grid-cols-[1.2fr_0.65fr_0.75fr_0.7fr_0.55fr_1.1fr] gap-3 border-b border-[var(--line)] bg-white/[0.02] px-4 py-3 text-xs font-semibold uppercase tracking-[0.12em] text-[var(--fg-muted)] sm:grid">
           <span>Player</span>
-          <span>Player ID</span>
+          <span>Registration ID</span>
           <span>Game</span>
           <span>Category</span>
           <span>Status</span>

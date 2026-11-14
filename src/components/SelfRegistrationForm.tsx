@@ -138,13 +138,14 @@ export function SelfRegistrationForm({ games }: Props) {
           {created.fullName}
         </h2>
         <p className="mt-2 text-[var(--fg-muted)]">
-          Keep this license ID. You can show it anytime to prove you are already
-          in Registration Hub.
+          Keep this Registration ID. You can show it anytime to prove you are
+          already in Registration Hub. An encoder will mark you as a Licensed
+          Player later.
         </p>
 
         <div className="mt-6 rounded-2xl border border-[rgba(45,212,168,0.35)] bg-[var(--accent-dim)] px-5 py-4">
           <p className="text-xs uppercase tracking-[0.14em] text-[var(--fg-muted)]">
-            Your license ID
+            Your Registration ID
           </p>
           <div className="mt-2 flex flex-wrap items-center gap-3">
             <p className="display font-mono text-3xl font-bold text-[var(--accent)] sm:text-4xl">
@@ -215,8 +216,8 @@ export function SelfRegistrationForm({ games }: Props) {
 
   return (
     <form onSubmit={onSubmit} className="space-y-6">
-      <div className="grid gap-5 xl:grid-cols-2">
-        <section className="panel flex h-full flex-col gap-5 p-5 sm:p-6 fade-up">
+      <div className="grid min-w-0 gap-5 xl:grid-cols-2">
+        <section className="panel flex h-full min-w-0 flex-col gap-5 p-4 sm:p-6 fade-up">
           <div>
             <h2 className="display text-2xl font-bold">Your details</h2>
             <p className="mt-1 text-sm text-[var(--fg-muted)]">
@@ -224,8 +225,8 @@ export function SelfRegistrationForm({ games }: Props) {
             </p>
           </div>
 
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div className="field sm:col-span-2">
+          <div className="grid min-w-0 gap-4 sm:grid-cols-2">
+            <div className="field min-w-0 sm:col-span-2">
               <label htmlFor="fullName">Full name</label>
               <input
                 id="fullName"
@@ -235,7 +236,7 @@ export function SelfRegistrationForm({ games }: Props) {
                 placeholder="Juan Dela Cruz"
               />
             </div>
-            <div className="field">
+            <div className="field min-w-0">
               <label htmlFor="birthdate">Birthdate</label>
               <input
                 id="birthdate"
@@ -245,7 +246,7 @@ export function SelfRegistrationForm({ games }: Props) {
                 required
               />
             </div>
-            <div className="field">
+            <div className="field min-w-0">
               <label htmlFor="phone">Phone</label>
               <input
                 id="phone"
@@ -254,7 +255,7 @@ export function SelfRegistrationForm({ games }: Props) {
                 placeholder="09XXXXXXXXX"
               />
             </div>
-            <div className="field">
+            <div className="field min-w-0">
               <label htmlFor="email">Email</label>
               <input
                 id="email"
@@ -264,7 +265,7 @@ export function SelfRegistrationForm({ games }: Props) {
                 placeholder="player@email.com"
               />
             </div>
-            <div className="field">
+            <div className="field min-w-0 sm:col-span-2">
               <label htmlFor="address">Address</label>
               <input
                 id="address"

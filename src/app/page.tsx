@@ -31,7 +31,7 @@ export default async function HomePage() {
               Register as a player
             </Link>
             <Link href="/my-license" className="btn btn-ghost">
-              Show my license ID
+              Show my Registration ID
             </Link>
             <Link href="/players" className="btn btn-ghost">
               Browse licensed players
@@ -68,8 +68,8 @@ export default async function HomePage() {
               },
               {
                 step: "03",
-                title: "Get your license ID",
-                body: "A unique license ID is issued and you appear in the licensed players database.",
+                title: "Get your Registration ID",
+                body: "A unique Registration ID is issued when you register. An encoder can later mark you as a Licensed Player.",
               },
             ].map((item) => (
               <li key={item.step}>

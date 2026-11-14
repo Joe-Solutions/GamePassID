@@ -3,7 +3,13 @@ import { notFound } from "next/navigation";
 import { SiteHeader } from "@/components/SiteHeader";
 import { getCurrentEncoder } from "@/lib/auth";
 import { getPlayerById } from "@/lib/db";
-import { categoryLabel, displayGameLabel, statusLabel } from "@/lib/types";
+import {
+  categoryLabel,
+  displayGameLabel,
+  playerCardEyebrow,
+  playerIdLabel,
+  statusLabel,
+} from "@/lib/types";
 
 export const dynamic = "force-dynamic";
 
@@ -18,11 +24,16 @@ export default async function PlayerDetailPage({ params }: Params) {
   if (!player) notFound();
 
   const encoder = await getCurrentEncoder();
+  const isLicensed = player.status === "licensed";
+  const registeredAt = new Date(player.createdAt);
+  const registeredLabel = Number.isNaN(registeredAt.getTime())
+    ? player.createdAt
+    : registeredAt.toLocaleString();
 
   return (
     <>
       <SiteHeader encoder={encoder} />
-      <main className="relative z-10 mx-auto w-full max-w-4xl flex-1 px-5 py-8 sm:px-8 sm:py-10">
+      <main className="relative z-10 mx-auto w-full min-w-0 max-w-4xl flex-1 px-4 py-6 sm:px-8 sm:py-10">
         <Link
           href="/players"
           className="text-sm font-semibold text-[var(--fg-muted)] transition hover:text-[var(--accent)]"
@@ -31,20 +42,32 @@ export default async function PlayerDetailPage({ params }: Params) {
         </Link>
 
         <article className="panel license-pop mt-6 overflow-hidden">
-          <div className="border-b border-[var(--line)] bg-[linear-gradient(120deg,rgba(45,212,168,0.16),transparent_55%)] px-6 py-5 sm:px-8">
+          <div className="border-b border-[var(--line)] bg-[linear-gradient(120deg,rgba(45,212,168,0.16),transparent_55%)] px-5 py-5 sm:px-8">
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--accent)]">
-              Official player license
+              {playerCardEyebrow(player.status)}
             </p>
             <h1 className="display mt-2 text-3xl font-bold sm:text-4xl">
               {player.fullName}
             </h1>
-            <p className="mt-1 font-mono text-lg text-[var(--accent)]">
-              {player.licenseId}
+            <p
+              className={`mt-2 text-sm font-semibold ${
+                isLicensed ? "text-[var(--accent)]" : "text-[var(--warning)]"
+              }`}
+            >
+              {statusLabel(player.status)}
             </p>
+            <div className="mt-3">
+              <p className="text-xs uppercase tracking-[0.14em] text-[var(--fg-muted)]">
+                {playerIdLabel(player.status)}
+              </p>
+              <p className="mt-1 font-mono text-lg text-[var(--accent)]">
+                {player.licenseId}
+              </p>
+            </div>
           </div>
 
-          <div className="grid gap-8 p-6 sm:grid-cols-[220px_1fr] sm:p-8">
-            <div className="overflow-hidden rounded-2xl border border-[var(--line-strong)] bg-black/30 aspect-square">
+          <div className="grid min-w-0 gap-8 p-5 sm:grid-cols-[220px_1fr] sm:p-8">
+            <div className="aspect-square overflow-hidden rounded-2xl border border-[var(--line-strong)] bg-black/30">
               {player.photoPath ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
@@ -82,9 +105,9 @@ export default async function PlayerDetailPage({ params }: Params) {
                 </dt>
                 <dd
                   className={`mt-1 text-lg font-semibold ${
-                    player.status === "licensed"
+                    isLicensed
                       ? "text-[var(--accent)]"
-                      : "text-[var(--fg-soft)]"
+                      : "text-[var(--warning)]"
                   }`}
                 >
                   {statusLabel(player.status)}
@@ -127,7 +150,7 @@ export default async function PlayerDetailPage({ params }: Params) {
                   Registered
                 </dt>
                 <dd className="mt-1 text-sm text-[var(--fg-soft)]">
-                  {player.createdAt}
+                  {registeredLabel}
                 </dd>
               </div>
             </dl>

@@ -44,12 +44,12 @@ export function RegistrationQrShare() {
   }
 
   return (
-    <div className="panel fade-up mx-auto max-w-2xl p-6 sm:p-8">
+    <div className="panel fade-up mx-auto w-full max-w-2xl min-w-0 p-4 sm:p-8">
       <div className="max-w-lg">
         <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--accent)]">
           Share with players
         </p>
-        <h2 className="display mt-2 text-3xl font-bold">
+        <h2 className="display mt-2 text-2xl font-bold sm:text-3xl">
           QR code registration link
         </h2>
         <p className="mt-2 text-[var(--fg-muted)]">
@@ -58,19 +58,20 @@ export function RegistrationQrShare() {
         </p>
       </div>
 
-      <div className="mt-8 grid gap-8 sm:grid-cols-[auto_1fr] sm:items-center">
-        <div className="mx-auto w-fit rounded-2xl border border-[var(--line-strong)] bg-white p-4 shadow-[0_12px_40px_rgba(0,0,0,0.25)]">
+      <div className="mt-8 grid min-w-0 gap-8 sm:grid-cols-[auto_1fr] sm:items-center">
+        <div className="mx-auto w-fit max-w-full rounded-2xl border border-[var(--line-strong)] bg-white p-3 sm:p-4 shadow-[0_12px_40px_rgba(0,0,0,0.25)]">
           {registerUrl ? (
             <QRCodeSVG
               value={registerUrl}
-              size={220}
+              size={200}
               level="M"
               marginSize={1}
               bgColor="#ffffff"
               fgColor="#04261c"
+              className="h-auto max-w-full"
             />
           ) : (
-            <div className="grid h-[220px] w-[220px] place-items-center text-sm text-[var(--fg-muted)]">
+            <div className="grid h-[200px] w-[200px] max-w-full place-items-center text-sm text-[var(--fg-muted)]">
               Loading…
             </div>
           )}

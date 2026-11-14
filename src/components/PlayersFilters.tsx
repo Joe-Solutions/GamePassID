@@ -27,7 +27,7 @@ export function PlayersFilters({ games }: { games: Game[] }) {
         <input
           id="q"
           defaultValue={searchParams.get("q") ?? ""}
-          placeholder="Name or player ID"
+          placeholder="Name or registration ID"
           onChange={(e) => update("q", e.target.value)}
         />
       </div>
@@ -69,8 +69,8 @@ export function PlayersFilters({ games }: { games: Game[] }) {
           onChange={(e) => update("status", e.target.value)}
         >
           <option value="">All statuses</option>
-          <option value="registered">Registered</option>
-          <option value="licensed">Licensed</option>
+          <option value="registered">Not yet licensed</option>
+          <option value="licensed">Licensed Player</option>
           <option value="inactive">Inactive</option>
         </select>
       </div>
