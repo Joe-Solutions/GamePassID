@@ -5,22 +5,24 @@ import Link from "next/link";
 import {
   categoryLabel,
   displayGameLabel,
+  playerCardEyebrow,
+  playerIdLabel,
   statusLabel,
   type Player,
 } from "@/lib/types";
 
 const STORAGE_KEY = "rh_my_license_id";
 
-type Mode = "licenseId" | "identity";
+type Mode = "playerId" | "identity";
 
-function readSavedLicenseId() {
+function readSavedPlayerId() {
   if (typeof window === "undefined") return "";
   return window.localStorage.getItem(STORAGE_KEY) ?? "";
 }
 
 export function MyLicenseLookup() {
-  const [mode, setMode] = useState<Mode>("licenseId");
-  const [licenseId, setLicenseId] = useState(readSavedLicenseId);
+  const [mode, setMode] = useState<Mode>("playerId");
+  const [playerId, setPlayerId] = useState(readSavedPlayerId);
   const [fullName, setFullName] = useState("");
   const [birthdate, setBirthdate] = useState("");
   const [pending, setPending] = useState(false);
@@ -52,14 +54,14 @@ export function MyLicenseLookup() {
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (mode === "licenseId") {
-      await lookup({ licenseId: licenseId.trim() });
+    if (mode === "playerId") {
+      await lookup({ licenseId: playerId.trim() });
       return;
     }
     await lookup({ fullName: fullName.trim(), birthdate });
   }
 
-  async function copyLicenseId() {
+  async function copyPlayerId() {
     if (!player) return;
     try {
       await navigator.clipboard.writeText(player.licenseId);
@@ -70,32 +72,34 @@ export function MyLicenseLookup() {
     }
   }
 
+  const isLicensed = player?.status === "licensed";
+
   return (
-    <div className="space-y-6">
-      <form onSubmit={onSubmit} className="panel space-y-5 p-5 sm:p-6">
+    <div className="min-w-0 space-y-6">
+      <form onSubmit={onSubmit} className="panel space-y-5 p-4 sm:p-6">
         <div
-          className="inline-flex rounded-full border border-[var(--line-strong)] bg-black/25 p-1"
+          className="flex w-full flex-col gap-1 rounded-2xl border border-[var(--line-strong)] bg-black/25 p-1 sm:inline-flex sm:w-auto sm:flex-row sm:rounded-full"
           role="tablist"
           aria-label="Lookup method"
         >
           <button
             type="button"
             role="tab"
-            aria-selected={mode === "licenseId"}
-            className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
-              mode === "licenseId"
+            aria-selected={mode === "playerId"}
+            className={`w-full rounded-xl px-4 py-2.5 text-left text-sm font-semibold transition sm:w-auto sm:rounded-full sm:text-center ${
+              mode === "playerId"
                 ? "bg-[var(--accent)] text-[#04261c]"
                 : "text-[var(--fg-soft)] hover:text-[var(--fg)]"
             }`}
-            onClick={() => setMode("licenseId")}
+            onClick={() => setMode("playerId")}
           >
-            License ID
+            Registration ID
           </button>
           <button
             type="button"
             role="tab"
             aria-selected={mode === "identity"}
-            className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
+            className={`w-full rounded-xl px-4 py-2.5 text-left text-sm font-semibold transition sm:w-auto sm:rounded-full sm:text-center ${
               mode === "identity"
                 ? "bg-[var(--accent)] text-[#04261c]"
                 : "text-[var(--fg-soft)] hover:text-[var(--fg)]"
@@ -106,21 +110,21 @@ export function MyLicenseLookup() {
           </button>
         </div>
 
-        {mode === "licenseId" ? (
-          <div className="field max-w-md">
-            <label htmlFor="licenseId">License ID</label>
+        {mode === "playerId" ? (
+          <div className="field max-w-md min-w-0">
+            <label htmlFor="playerId">Registration ID</label>
             <input
-              id="licenseId"
-              value={licenseId}
-              onChange={(e) => setLicenseId(e.target.value)}
+              id="playerId"
+              value={playerId}
+              onChange={(e) => setPlayerId(e.target.value)}
               placeholder="EG-2026-1001"
               required
               autoComplete="off"
             />
           </div>
         ) : (
-          <div className="grid max-w-xl gap-4 sm:grid-cols-2">
-            <div className="field sm:col-span-2">
+          <div className="grid max-w-xl min-w-0 gap-4 sm:grid-cols-2">
+            <div className="field min-w-0 sm:col-span-2">
               <label htmlFor="fullName">Full name</label>
               <input
                 id="fullName"
@@ -130,7 +134,7 @@ export function MyLicenseLookup() {
                 required
               />
             </div>
-            <div className="field">
+            <div className="field min-w-0">
               <label htmlFor="birthdate">Birthdate</label>
               <input
                 id="birthdate"
@@ -146,25 +150,29 @@ export function MyLicenseLookup() {
         {error && <p className="text-sm text-[var(--danger)]">{error}</p>}
 
         <button type="submit" className="btn btn-primary" disabled={pending}>
-          {pending ? "Looking up…" : "Show my license"}
+          {pending ? "Looking up…" : "Show my registration"}
         </button>
       </form>
 
       {player && (
         <article className="panel license-pop overflow-hidden">
-          <div className="border-b border-[var(--line)] bg-[linear-gradient(120deg,rgba(45,212,168,0.16),transparent_55%)] px-6 py-5 sm:px-8">
+          <div className="border-b border-[var(--line)] bg-[linear-gradient(120deg,rgba(45,212,168,0.16),transparent_55%)] px-5 py-5 sm:px-8">
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--accent)]">
-              Registered player
+              {playerCardEyebrow(player.status)}
             </p>
             <h2 className="display mt-2 text-3xl font-bold sm:text-4xl">
               {player.fullName}
             </h2>
-            <p className="mt-3 text-sm text-[var(--fg-muted)]">
-              You are already registered in Registration Hub.
+            <p
+              className={`mt-3 text-sm font-semibold ${
+                isLicensed ? "text-[var(--accent)]" : "text-[var(--warning)]"
+              }`}
+            >
+              {statusLabel(player.status)}
             </p>
           </div>
 
-          <div className="grid gap-8 p-6 sm:grid-cols-[180px_1fr] sm:p-8">
+          <div className="grid min-w-0 gap-8 p-5 sm:grid-cols-[180px_1fr] sm:p-8">
             <div className="aspect-square overflow-hidden rounded-2xl border border-[var(--line-strong)] bg-black/30">
               {player.photoPath ? (
                 // eslint-disable-next-line @next/next/no-img-element
@@ -180,10 +188,10 @@ export function MyLicenseLookup() {
               )}
             </div>
 
-            <div className="space-y-5">
+            <div className="min-w-0 space-y-5">
               <div>
                 <p className="text-xs uppercase tracking-[0.14em] text-[var(--fg-muted)]">
-                  License ID
+                  {playerIdLabel(player.status)}
                 </p>
                 <div className="mt-2 flex flex-wrap items-center gap-3">
                   <p className="display font-mono text-3xl font-bold text-[var(--accent)] sm:text-4xl">
@@ -192,11 +200,17 @@ export function MyLicenseLookup() {
                   <button
                     type="button"
                     className="btn btn-ghost !px-3 !py-1.5 text-sm"
-                    onClick={copyLicenseId}
+                    onClick={copyPlayerId}
                   >
                     {copied ? "Copied" : "Copy ID"}
                   </button>
                 </div>
+                {!isLicensed && (
+                  <p className="mt-2 text-sm text-[var(--fg-muted)]">
+                    This is your Registration ID while you are not yet licensed
+                    by an encoder.
+                  </p>
+                )}
               </div>
 
               <dl className="grid gap-4 sm:grid-cols-2">
@@ -216,15 +230,15 @@ export function MyLicenseLookup() {
                     {categoryLabel(player.category)}
                   </dd>
                 </div>
-                <div>
+                <div className="sm:col-span-2">
                   <dt className="text-xs uppercase tracking-[0.14em] text-[var(--fg-muted)]">
                     Status
                   </dt>
                   <dd
                     className={`mt-1 font-semibold ${
-                      player.status === "licensed"
+                      isLicensed
                         ? "text-[var(--accent)]"
-                        : "text-[var(--fg-soft)]"
+                        : "text-[var(--warning)]"
                     }`}
                   >
                     {statusLabel(player.status)}
@@ -236,7 +250,7 @@ export function MyLicenseLookup() {
                 href={`/players/${player.id}`}
                 className="btn btn-primary inline-flex"
               >
-                Open full license card
+                Open full player card
               </Link>
             </div>
           </div>

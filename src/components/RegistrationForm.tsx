@@ -200,7 +200,7 @@ export function RegistrationForm({
           </div>
           <dl className="grid gap-3 text-sm sm:grid-cols-2">
             <div>
-              <dt className="text-[var(--fg-muted)]">License ID</dt>
+              <dt className="text-[var(--fg-muted)]">Registration ID</dt>
               <dd className="display mt-1 text-xl font-bold text-[var(--accent)]">
                 {created.licenseId}
               </dd>
@@ -260,8 +260,8 @@ export function RegistrationForm({
         </div>
       )}
 
-      <div className="grid gap-5 xl:grid-cols-2">
-        <section className="panel flex h-full flex-col gap-5 p-5 sm:p-6 fade-up">
+      <div className="grid min-w-0 gap-5 xl:grid-cols-2">
+        <section className="panel flex h-full min-w-0 flex-col gap-5 p-4 sm:p-6 fade-up">
           <div>
             <h2 className="display text-2xl font-bold">Player identity</h2>
             <p className="mt-1 text-sm text-[var(--fg-muted)]">
@@ -271,8 +271,8 @@ export function RegistrationForm({
             </p>
           </div>
 
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div className="field sm:col-span-2">
+          <div className="grid min-w-0 gap-4 sm:grid-cols-2">
+            <div className="field min-w-0 sm:col-span-2">
               <label htmlFor="fullName">Full name</label>
               <input
                 id="fullName"
@@ -282,7 +282,7 @@ export function RegistrationForm({
                 placeholder="Juan Dela Cruz"
               />
             </div>
-            <div className="field">
+            <div className="field min-w-0">
               <label htmlFor="birthdate">Birthdate</label>
               <input
                 id="birthdate"
@@ -292,7 +292,7 @@ export function RegistrationForm({
                 required
               />
             </div>
-            <div className="field">
+            <div className="field min-w-0">
               <label htmlFor="phone">Phone</label>
               <input
                 id="phone"
@@ -301,7 +301,7 @@ export function RegistrationForm({
                 placeholder="09XXXXXXXXX"
               />
             </div>
-            <div className="field">
+            <div className="field min-w-0">
               <label htmlFor="email">Email</label>
               <input
                 id="email"
@@ -311,7 +311,7 @@ export function RegistrationForm({
                 placeholder="player@email.com"
               />
             </div>
-            <div className="field">
+            <div className="field min-w-0 sm:col-span-2">
               <label htmlFor="address">Address</label>
               <input
                 id="address"
@@ -323,7 +323,7 @@ export function RegistrationForm({
           </div>
         </section>
 
-        <section className="panel flex h-full flex-col gap-5 p-5 sm:p-6 fade-up-delay">
+        <section className="panel flex h-full min-w-0 flex-col gap-5 p-4 sm:p-6 fade-up-delay">
           <div>
             <h2 className="display text-2xl font-bold">Player category</h2>
             <p className="mt-1 text-sm text-[var(--fg-muted)]">
@@ -364,7 +364,7 @@ export function RegistrationForm({
           </div>
         </section>
 
-        <section className="panel flex h-full flex-col gap-5 p-5 sm:p-6">
+        <section className="panel flex h-full min-w-0 flex-col gap-5 p-4 sm:p-6">
           <div>
             <h2 className="display text-2xl font-bold">Game registration</h2>
             <p className="mt-1 text-sm text-[var(--fg-muted)]">
@@ -404,7 +404,7 @@ export function RegistrationForm({
           </div>
         </section>
 
-        <section className="panel flex h-full flex-col gap-5 p-5 sm:p-6">
+        <section className="panel flex h-full min-w-0 flex-col gap-5 p-4 sm:p-6">
           <div>
             <h2 className="display text-2xl font-bold">Profile photo</h2>
             <p className="mt-1 text-sm text-[var(--fg-muted)]">

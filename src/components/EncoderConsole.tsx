@@ -56,9 +56,9 @@ export function EncoderConsole({
   }
 
   return (
-    <div className="space-y-6">
+    <div className="min-w-0 space-y-6">
       <div
-        className="inline-flex max-w-full flex-wrap rounded-full border border-[var(--line-strong)] bg-black/25 p-1"
+        className="flex w-full flex-col gap-1 rounded-2xl border border-[var(--line-strong)] bg-black/25 p-1 sm:inline-flex sm:w-auto sm:max-w-full sm:flex-row sm:flex-wrap sm:rounded-full"
         role="tablist"
         aria-label="Encoder console sections"
       >
@@ -66,7 +66,7 @@ export function EncoderConsole({
           type="button"
           role="tab"
           aria-selected={tab === "register"}
-          className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
+          className={`w-full rounded-xl px-4 py-2.5 text-left text-sm font-semibold transition sm:w-auto sm:rounded-full sm:text-center ${
             tab === "register"
               ? "bg-[var(--accent)] text-[#04261c]"
               : "text-[var(--fg-soft)] hover:text-[var(--fg)]"
@@ -76,13 +76,20 @@ export function EncoderConsole({
             setTab("register");
           }}
         >
-          {editingPlayer ? "Edit player" : "Register new player"}
+          {editingPlayer ? (
+            "Edit player"
+          ) : (
+            <>
+              <span className="sm:hidden">Register player</span>
+              <span className="hidden sm:inline">Register new player</span>
+            </>
+          )}
         </button>
         <button
           type="button"
           role="tab"
           aria-selected={tab === "list"}
-          className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
+          className={`w-full rounded-xl px-4 py-2.5 text-left text-sm font-semibold transition sm:w-auto sm:rounded-full sm:text-center ${
             tab === "list"
               ? "bg-[var(--accent)] text-[#04261c]"
               : "text-[var(--fg-soft)] hover:text-[var(--fg)]"
@@ -92,13 +99,14 @@ export function EncoderConsole({
             setTab("list");
           }}
         >
-          List of Registered Players
+          <span className="sm:hidden">Registered players</span>
+          <span className="hidden sm:inline">List of Registered Players</span>
         </button>
         <button
           type="button"
           role="tab"
           aria-selected={tab === "qr"}
-          className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
+          className={`w-full rounded-xl px-4 py-2.5 text-left text-sm font-semibold transition sm:w-auto sm:rounded-full sm:text-center ${
             tab === "qr"
               ? "bg-[var(--accent)] text-[#04261c]"
               : "text-[var(--fg-soft)] hover:text-[var(--fg)]"
@@ -108,7 +116,8 @@ export function EncoderConsole({
             setTab("qr");
           }}
         >
-          QR registration link
+          <span className="sm:hidden">QR registration</span>
+          <span className="hidden sm:inline">QR registration link</span>
         </button>
       </div>
 

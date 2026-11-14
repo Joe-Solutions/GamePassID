@@ -62,7 +62,7 @@ export default async function PlayersPage({
         <div className="mt-6 overflow-hidden rounded-[var(--radius)] border border-[var(--line)]">
           <div className="hidden grid-cols-[1.4fr_0.8fr_0.9fr_0.8fr_0.7fr] gap-3 border-b border-[var(--line)] bg-white/[0.02] px-4 py-3 text-xs font-semibold uppercase tracking-[0.12em] text-[var(--fg-muted)] sm:grid">
             <span>Player</span>
-            <span>Player ID</span>
+            <span>Registration ID</span>
             <span>Game</span>
             <span>Category</span>
             <span>Status</span>
