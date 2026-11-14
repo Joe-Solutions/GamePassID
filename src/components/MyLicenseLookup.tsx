@@ -5,6 +5,7 @@ import Link from "next/link";
 import {
   categoryLabel,
   displayGameLabel,
+  statusLabel,
   type Player,
 } from "@/lib/types";
 
@@ -219,8 +220,14 @@ export function MyLicenseLookup() {
                   <dt className="text-xs uppercase tracking-[0.14em] text-[var(--fg-muted)]">
                     Status
                   </dt>
-                  <dd className="mt-1 font-semibold capitalize text-[var(--accent)]">
-                    {player.status}
+                  <dd
+                    className={`mt-1 font-semibold ${
+                      player.status === "licensed"
+                        ? "text-[var(--accent)]"
+                        : "text-[var(--fg-soft)]"
+                    }`}
+                  >
+                    {statusLabel(player.status)}
                   </dd>
                 </div>
               </dl>

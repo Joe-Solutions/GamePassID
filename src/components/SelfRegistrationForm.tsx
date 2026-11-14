@@ -7,6 +7,7 @@ import {
   OTHERS_GAME_SLUG,
   PLAYER_CATEGORIES,
   displayGameLabel,
+  statusLabel,
   type Game,
   type Player,
   type PlayerCategory,
@@ -197,8 +198,8 @@ export function SelfRegistrationForm({ games }: Props) {
             </div>
             <div>
               <dt className="text-[var(--fg-muted)]">Status</dt>
-              <dd className="mt-1 font-semibold capitalize text-[var(--accent)]">
-                {created.status}
+              <dd className="mt-1 font-semibold text-[var(--fg-soft)]">
+                {statusLabel(created.status)}
               </dd>
             </div>
           </dl>

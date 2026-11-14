@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { RegistrationForm } from "./RegistrationForm";
 import { RegisteredPlayersList } from "./RegisteredPlayersList";
+import { RegistrationQrShare } from "./RegistrationQrShare";
 import {
   categoryLabel,
   displayGameLabel,
@@ -11,7 +12,7 @@ import {
   type Player,
 } from "@/lib/types";
 
-type Tab = "register" | "list";
+type Tab = "register" | "list" | "qr";
 
 type Props = {
   games: Game[];
@@ -57,7 +58,7 @@ export function EncoderConsole({
   return (
     <div className="space-y-6">
       <div
-        className="inline-flex rounded-full border border-[var(--line-strong)] bg-black/25 p-1"
+        className="inline-flex max-w-full flex-wrap rounded-full border border-[var(--line-strong)] bg-black/25 p-1"
         role="tablist"
         aria-label="Encoder console sections"
       >
@@ -92,6 +93,22 @@ export function EncoderConsole({
           }}
         >
           List of Registered Players
+        </button>
+        <button
+          type="button"
+          role="tab"
+          aria-selected={tab === "qr"}
+          className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
+            tab === "qr"
+              ? "bg-[var(--accent)] text-[#04261c]"
+              : "text-[var(--fg-soft)] hover:text-[var(--fg)]"
+          }`}
+          onClick={() => {
+            clearEdit();
+            setTab("qr");
+          }}
+        >
+          QR registration link
         </button>
       </div>
 
@@ -176,7 +193,7 @@ export function EncoderConsole({
             </section>
           )}
         </div>
-      ) : (
+      ) : tab === "list" ? (
         <RegisteredPlayersList
           initialPlayers={players}
           onEdit={startEdit}
@@ -184,7 +201,10 @@ export function EncoderConsole({
             setPlayers((prev) => prev.filter((p) => p.id !== playerId));
             setRecent((prev) => prev.filter((p) => p.id !== playerId));
           }}
+          onUpdated={(player) => upsertPlayer(player)}
         />
+      ) : (
+        <RegistrationQrShare />
       )}
     </div>
   );

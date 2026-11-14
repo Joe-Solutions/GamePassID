@@ -24,7 +24,7 @@ const updateSchema = z.object({
   category: z.enum(["casual", "amateur", "student"]),
   gameId: z.coerce.number().int().positive(),
   gameOther: z.string().trim().max(120).optional().or(z.literal("")),
-  status: z.enum(["licensed", "inactive"]).optional(),
+  status: z.enum(["registered", "licensed", "inactive"]).optional(),
 });
 
 export async function GET(_request: Request, { params }: Params) {

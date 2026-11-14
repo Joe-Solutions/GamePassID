@@ -209,7 +209,7 @@ export async function createPlayer(input: {
       gameId: input.gameId,
       gameOther: input.gameOther ?? null,
       photoPath: input.photoPath ?? null,
-      status: "licensed",
+      status: "registered",
       encodedBy: input.encodedBy ?? null,
     },
     include: playerInclude,
@@ -248,6 +248,22 @@ export async function updatePlayer(
         ...(input.photoPath !== undefined ? { photoPath: input.photoPath } : {}),
         ...(input.status ? { status: input.status } : {}),
       },
+      include: playerInclude,
+    });
+    return mapPlayer(player);
+  } catch {
+    return null;
+  }
+}
+
+export async function setPlayerStatus(
+  id: number,
+  status: PlayerStatus,
+): Promise<Player | null> {
+  try {
+    const player = await prisma.player.update({
+      where: { id },
+      data: { status },
       include: playerInclude,
     });
     return mapPlayer(player);

@@ -5,6 +5,7 @@ import Link from "next/link";
 import {
   categoryLabel,
   displayGameLabel,
+  statusLabel,
   type Player,
 } from "@/lib/types";
 
@@ -12,18 +13,21 @@ type Props = {
   initialPlayers: Player[];
   onEdit: (player: Player) => void;
   onDeleted: (playerId: number) => void;
+  onUpdated?: (player: Player) => void;
 };
 
 export function RegisteredPlayersList({
   initialPlayers,
   onEdit,
   onDeleted,
+  onUpdated,
 }: Props) {
   const [query, setQuery] = useState("");
   const [players, setPlayers] = useState(initialPlayers);
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<number | null>(null);
+  const [licensingId, setLicensingId] = useState<number | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -75,6 +79,38 @@ export function RegisteredPlayersList({
     }
   }
 
+  async function onLicense(player: Player) {
+    if (player.status === "licensed") return;
+
+    const confirmed = window.confirm(
+      `Mark ${player.fullName} (${player.licenseId}) as Licensed?`,
+    );
+    if (!confirmed) return;
+
+    setLicensingId(player.id);
+    setError(null);
+    try {
+      const res = await fetch(`/api/players/${player.id}/status`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: "licensed" }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        throw new Error(data.error || "Could not license player");
+      }
+      const updated = data.player as Player;
+      setPlayers((prev) =>
+        prev.map((p) => (p.id === updated.id ? updated : p)),
+      );
+      onUpdated?.(updated);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not license player");
+    } finally {
+      setLicensingId(null);
+    }
+  }
+
   return (
     <div className="space-y-5 fade-up">
       <div className="panel p-5 sm:p-6">
@@ -84,7 +120,7 @@ export function RegisteredPlayersList({
             id="registeredPlayerSearch"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search by name, license ID, email, or other game"
+            placeholder="Search by name, player ID, email, or other game"
             autoComplete="off"
           />
         </div>
@@ -101,9 +137,9 @@ export function RegisteredPlayersList({
           pending ? "opacity-70" : ""
         }`}
       >
-        <div className="hidden grid-cols-[1.3fr_0.7fr_0.85fr_0.75fr_0.55fr_0.9fr] gap-3 border-b border-[var(--line)] bg-white/[0.02] px-4 py-3 text-xs font-semibold uppercase tracking-[0.12em] text-[var(--fg-muted)] sm:grid">
+        <div className="hidden grid-cols-[1.2fr_0.65fr_0.75fr_0.7fr_0.55fr_1.1fr] gap-3 border-b border-[var(--line)] bg-white/[0.02] px-4 py-3 text-xs font-semibold uppercase tracking-[0.12em] text-[var(--fg-muted)] sm:grid">
           <span>Player</span>
-          <span>License</span>
+          <span>Player ID</span>
           <span>Game</span>
           <span>Category</span>
           <span>Status</span>
@@ -121,7 +157,7 @@ export function RegisteredPlayersList({
                 key={player.id}
                 className="border-b border-[var(--line)] last:border-b-0"
               >
-                <div className="grid gap-3 px-4 py-4 sm:grid-cols-[1.3fr_0.7fr_0.85fr_0.75fr_0.55fr_0.9fr] sm:items-center sm:gap-3">
+                <div className="grid gap-3 px-4 py-4 sm:grid-cols-[1.2fr_0.65fr_0.75fr_0.7fr_0.55fr_1.1fr] sm:items-center sm:gap-3">
                   <Link
                     href={`/players/${player.id}`}
                     className="flex items-center gap-3 transition hover:opacity-90"
@@ -156,10 +192,26 @@ export function RegisteredPlayersList({
                   <p className="text-sm text-[var(--fg-soft)]">
                     {categoryLabel(player.category)}
                   </p>
-                  <p className="text-sm capitalize text-[var(--accent)]">
-                    {player.status}
+                  <p
+                    className={`text-sm font-semibold ${
+                      player.status === "licensed"
+                        ? "text-[var(--accent)]"
+                        : "text-[var(--fg-soft)]"
+                    }`}
+                  >
+                    {statusLabel(player.status)}
                   </p>
                   <div className="flex flex-wrap gap-2">
+                    {player.status !== "licensed" && (
+                      <button
+                        type="button"
+                        className="btn btn-primary !px-3 !py-1.5 text-sm"
+                        disabled={licensingId === player.id}
+                        onClick={() => onLicense(player)}
+                      >
+                        {licensingId === player.id ? "Licensing…" : "License"}
+                      </button>
+                    )}
                     <button
                       type="button"
                       className="btn btn-ghost !px-3 !py-1.5 text-sm"

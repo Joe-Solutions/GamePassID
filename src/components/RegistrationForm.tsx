@@ -7,6 +7,7 @@ import {
   OTHERS_GAME_SLUG,
   PLAYER_CATEGORIES,
   displayGameLabel,
+  statusLabel,
   type Game,
   type Player,
   type PlayerCategory,
@@ -175,7 +176,8 @@ export function RegistrationForm({
           {created.fullName}
         </h2>
         <p className="mt-2 text-[var(--fg-muted)]">
-          Encoded by {encoderName}. Player is now in the licensed database.
+          Encoded by {encoderName}. Player is registered and waiting to be
+          licensed.
         </p>
 
         <div className="mt-6 grid gap-6 sm:grid-cols-[160px_1fr]">
@@ -215,8 +217,8 @@ export function RegistrationForm({
             </div>
             <div>
               <dt className="text-[var(--fg-muted)]">Status</dt>
-              <dd className="mt-1 font-semibold capitalize text-[var(--accent)]">
-                {created.status}
+              <dd className="mt-1 font-semibold text-[var(--fg-soft)]">
+                {statusLabel(created.status)}
               </dd>
             </div>
           </dl>
