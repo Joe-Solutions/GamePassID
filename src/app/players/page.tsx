@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Suspense } from "react";
 import { SiteHeader } from "@/components/SiteHeader";
 import { PlayersFilters } from "@/components/PlayersFilters";
+import { ExportPlayersButton } from "@/components/ExportPlayersButton";
 import { getCurrentEncoder } from "@/lib/auth";
 import { countPlayersByStatus, listGames, listPlayers } from "@/lib/db";
 import {
@@ -47,17 +48,20 @@ export default async function PlayersPage({
     <>
       <SiteHeader encoder={encoder} />
       <main className="relative z-10 mx-auto w-full min-w-0 max-w-[90rem] flex-1 px-4 py-6 sm:px-8 sm:py-10">
-        <div className="fade-up">
-          <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--accent)]">
-            Licensed database
-          </p>
-          <h1 className="display mt-2 text-4xl font-bold tracking-tight">
-            Players
-          </h1>
-          <p className="mt-2 max-w-2xl text-[var(--fg-muted)]">
-            Search and filter every licensed player registered for tournament
-            play.
-          </p>
+        <div className="fade-up flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+          <div className="min-w-0">
+            <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--accent)]">
+              Licensed database
+            </p>
+            <h1 className="display mt-2 text-4xl font-bold tracking-tight">
+              Players
+            </h1>
+            <p className="mt-2 max-w-2xl text-[var(--fg-muted)]">
+              Search and filter every licensed player registered for tournament
+              play.
+            </p>
+          </div>
+          {encoder && <ExportPlayersButton />}
         </div>
 
         {encoder && (
