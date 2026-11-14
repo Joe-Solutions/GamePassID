@@ -112,6 +112,27 @@ jobs:
             source ~/.bashrc || true
             nvm use 24.22.1 || nvm install 24.22.1
 
+            echo "Disk usage before install:"
+            df -h "$APP_DIR" || df -h /
+
+            # Free space before npm install (shared EC2 can fill up across apps).
+            rm -rf "$APP_DIR/.next" "$APP_DIR/node_modules"
+            npm cache clean --force || true
+            pm2 flush gamepassid >/dev/null 2>&1 || true
+            # Drop old npm debug logs that accumulate under the deploy user.
+            rm -rf "$HOME/.npm/_logs"/* 2>/dev/null || true
+
+            echo "Disk usage after cleanup:"
+            df -h "$APP_DIR" || df -h /
+
+            AVAILABLE_KB="$(df -Pk "$APP_DIR" | awk 'NR==2 {print $4}')"
+            if [ -n "$AVAILABLE_KB" ] && [ "$AVAILABLE_KB" -lt 1048576 ]; then
+              echo "ERROR: Less than 1GB free on the EC2 disk for $APP_DIR (available ${AVAILABLE_KB}KB)."
+              echo "Free space on the shared host (other /var/www apps, docker, logs, old node_modules) then re-run deploy."
+              df -h
+              exit 1
+            fi
+
             # Next/Tailwind build needs devDependencies even when .env has NODE_ENV=production.
             if [ -f package-lock.json ]; then
               npm ci --include=dev
