@@ -68,11 +68,6 @@ export function LoginForm() {
       <button type="submit" className="btn btn-primary w-full" disabled={loading}>
         {loading ? "Signing in…" : "Sign in"}
       </button>
-
-      <p className="text-xs text-[var(--fg-muted)]">
-        Demo account: <span className="text-[var(--fg-soft)]">encoder</span> /{" "}
-        <span className="text-[var(--fg-soft)]">encoder123</span>
-      </p>
     </form>
   );
 }

@@ -20,17 +20,23 @@ export function SiteHeader({ encoder }: { encoder?: Encoder | null }) {
         </Link>
 
         <nav className="flex items-center gap-2 sm:gap-3">
+          <Link href="/register" className="btn btn-primary !px-3 !py-2 text-sm">
+            Register
+          </Link>
+          <Link href="/my-license" className="btn btn-ghost !px-3 !py-2 text-sm">
+            My License
+          </Link>
           <Link href="/players" className="btn btn-ghost !px-3 !py-2 text-sm">
             Browse Licenses
           </Link>
           {encoder ? (
-            <Link href="/encoder" className="btn btn-primary !px-3 !py-2 text-sm">
+            <Link href="/encoder" className="btn btn-ghost !px-3 !py-2 text-sm">
               Encoder Console
             </Link>
           ) : (
             <Link
               href="/encoder/login"
-              className="btn btn-primary !px-3 !py-2 text-sm"
+              className="btn btn-ghost !px-3 !py-2 text-sm"
             >
               Encoder Login
             </Link>

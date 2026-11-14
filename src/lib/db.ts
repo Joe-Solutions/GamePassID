@@ -131,6 +131,33 @@ export async function getPlayerById(id: number): Promise<Player | null> {
   return player ? mapPlayer(player) : null;
 }
 
+export async function getPlayerByLicenseId(
+  licenseId: string,
+): Promise<Player | null> {
+  const player = await prisma.player.findFirst({
+    where: {
+      licenseId: { equals: licenseId.trim(), mode: "insensitive" },
+    },
+    include: playerInclude,
+  });
+  return player ? mapPlayer(player) : null;
+}
+
+export async function findPlayerByNameAndBirthdate(
+  fullName: string,
+  birthdate: string,
+): Promise<Player | null> {
+  const player = await prisma.player.findFirst({
+    where: {
+      fullName: { equals: fullName.trim(), mode: "insensitive" },
+      birthdate,
+    },
+    include: playerInclude,
+    orderBy: { createdAt: "desc" },
+  });
+  return player ? mapPlayer(player) : null;
+}
+
 export async function getRecentPlayers(limit = 8): Promise<Player[]> {
   const players = await prisma.player.findMany({
     include: playerInclude,
@@ -167,7 +194,7 @@ export async function createPlayer(input: {
   gameId: number;
   gameOther?: string | null;
   photoPath?: string | null;
-  encodedBy: number;
+  encodedBy?: number | null;
 }): Promise<Player> {
   const licenseId = await generateLicenseId();
   const player = await prisma.player.create({
@@ -183,7 +210,7 @@ export async function createPlayer(input: {
       gameOther: input.gameOther ?? null,
       photoPath: input.photoPath ?? null,
       status: "licensed",
-      encodedBy: input.encodedBy,
+      encodedBy: input.encodedBy ?? null,
     },
     include: playerInclude,
   });
